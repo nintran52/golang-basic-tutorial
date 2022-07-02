@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/nintran52/nana-tutorial/helper"
 )
@@ -29,6 +30,7 @@ func main() {
 
 		if isValidName && isValidEmail && isValidTicketNumber {
 			bookTickets(firstName, lastName, email, userTickets)
+			go sendTicket(firstName, lastName, email, userTickets)
 
 			printFirstName()
 
@@ -101,4 +103,12 @@ func printFirstName() {
 		firstNames = append(firstNames, booking.firstName)
 	}
 	fmt.Printf("The first name of bookings are: %v\n", firstNames)
+}
+
+func sendTicket(firstName string, lastName string, email string, userTickets uint) {
+	time.Sleep(10 * time.Second)
+	var ticket = fmt.Sprintf("%v tickets for %v %v", userTickets, firstName, lastName)
+	fmt.Println("############")
+	fmt.Printf("Sending ticket:\n %v \nto email address %v\n", ticket, email)
+	fmt.Println("############")
 }
