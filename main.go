@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/nintran52/nana-tutorial/helper"
@@ -20,37 +21,40 @@ type UserData struct {
 	numberOfTickets uint
 }
 
+var wg = sync.WaitGroup{}
+
 func main() {
 	greetUsers()
 
-	for remainingTickets > 0 && len(bookings) < 50 {
-		firstName, lastName, email, userTickets := getUserInput()
+	firstName, lastName, email, userTickets := getUserInput()
+	isValidName, isValidEmail, isValidTicketNumber := helper.ValidateUserInput(firstName, lastName, email, userTickets, remainingTickets)
 
-		isValidName, isValidEmail, isValidTicketNumber := helper.ValidateUserInput(firstName, lastName, email, userTickets, remainingTickets)
+	if isValidName && isValidEmail && isValidTicketNumber {
+		bookTickets(firstName, lastName, email, userTickets)
 
-		if isValidName && isValidEmail && isValidTicketNumber {
-			bookTickets(firstName, lastName, email, userTickets)
-			go sendTicket(firstName, lastName, email, userTickets)
+		wg.Add(1)
+		go sendTicket(firstName, lastName, email, userTickets)
 
-			printFirstName()
+		printFirstName()
 
-			if remainingTickets == 0 {
-				// end program
-				fmt.Println("Our conference is booked out. Come back next year.")
-				break
-			}
-		} else {
-			if !isValidEmail {
-				fmt.Println("Your input name is to short!")
-			}
-			if !isValidEmail {
-				fmt.Println("Your input email doesn't contain @ sign!")
-			}
-			if !isValidTicketNumber {
-				fmt.Println("Your input tickets is invalid!")
-			}
+		if remainingTickets == 0 {
+			// end program
+			fmt.Println("Our conference is booked out. Come back next year.")
+			// break
+		}
+	} else {
+		if !isValidEmail {
+			fmt.Println("Your input name is to short!")
+		}
+		if !isValidEmail {
+			fmt.Println("Your input email doesn't contain @ sign!")
+		}
+		if !isValidTicketNumber {
+			fmt.Println("Your input tickets is invalid!")
 		}
 	}
+
+	wg.Wait()
 }
 
 func greetUsers() {
@@ -111,4 +115,5 @@ func sendTicket(firstName string, lastName string, email string, userTickets uin
 	fmt.Println("############")
 	fmt.Printf("Sending ticket:\n %v \nto email address %v\n", ticket, email)
 	fmt.Println("############")
+	wg.Done()
 }
