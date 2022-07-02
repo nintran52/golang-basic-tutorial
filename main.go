@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"strings"
+	"strconv"
 
 	"github.com/nintran52/nana-tutorial/helper"
 )
@@ -11,7 +11,7 @@ const conferenceTickets = 50
 
 var conferenceName = "Go Conference"
 var remainingTickets uint = 50
-var bookings = []string{}
+var bookings = make([]map[string]string, 0)
 
 func main() {
 	greetUsers()
@@ -80,8 +80,9 @@ func bookTickets(firstName string, lastName string, email string, userTickets ui
 	userData["firstName"] = firstName
 	userData["lastName"] = lastName
 	userData["email"] = email
+	userData["tickets"] = strconv.FormatUint(uint64(userTickets), 10)
 
-	bookings = append(bookings, firstName+" "+lastName)
+	bookings = append(bookings, userData)
 
 	fmt.Printf("Thank you %v %v for booking %v tickets. You will receive a confirmation email at %v\n", firstName, lastName, userTickets, email)
 	fmt.Printf("%v tickets remaining for %v\n", remainingTickets, conferenceName)
@@ -90,8 +91,7 @@ func bookTickets(firstName string, lastName string, email string, userTickets ui
 func printFirstName() {
 	firstNames := []string{}
 	for _, booking := range bookings {
-		var names = strings.Fields(booking)
-		firstNames = append(firstNames, names[0])
+		firstNames = append(firstNames, booking["firstName"])
 	}
 	fmt.Printf("The first name of bookings are: %v\n", firstNames)
 }
